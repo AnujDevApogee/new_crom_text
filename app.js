@@ -136,12 +136,20 @@ async function callApi(payload, isDeploy, thinkingEl) {
     console.log('🚀 [API START] Sending request:', payload);
     const startTime = Date.now();
 
+    // AbortController lets us cancel the fetch after a timeout
+    const TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes — adjust if needed
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payload),
+            signal: controller.signal   // 👈 ties the fetch to our abort controller
         });
+
+        clearTimeout(timeoutId); // ✅ Response arrived — cancel the timeout
 
         console.log(`📡 [API RESPONSE] Status: ${response.status}`, response);
         const resData = await response.json();
@@ -164,10 +172,28 @@ async function callApi(payload, isDeploy, thinkingEl) {
             handleError(resData.msg, isDeploy);
         }
     } catch (error) {
-        console.error('💥 [API EXCEPTION] Network/System error:', error);
+        clearTimeout(timeoutId);
+
         // Remove thinking loader if present
         if (thinkingEl) thinkingEl.remove();
-        handleError(null, isDeploy);
+
+        if (error.name === 'AbortError') {
+            // Fetch was cancelled because it exceeded TIMEOUT_MS
+            console.error('⏰ [API TIMEOUT] Request exceeded timeout limit');
+            const timeoutMsg = 'Request timed out. The server is taking too long to respond — please try again.';
+            handleError(timeoutMsg, isDeploy);
+        } else if (error instanceof TypeError && error.message === 'Failed to fetch') {
+            // This usually means:
+            //   1. CORS blocked (opening file:// directly in browser without a local server)
+            //   2. Server is down or unreachable
+            //   3. No internet connection
+            console.error('🚫 [API CORS/NETWORK] Failed to fetch — likely CORS or server down:', error);
+            handleError('Cannot reach the server. Check your internet connection or open the app via a local server (not file://).', isDeploy);
+        } else {
+            // Other unexpected error
+            console.error('💥 [API EXCEPTION] Unexpected error:', error);
+            handleError(null, isDeploy);
+        }
     }
 }
 
