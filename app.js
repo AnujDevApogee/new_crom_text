@@ -63,10 +63,13 @@ function handleStart() {
     sessionBadge.textContent = `Session: ${currentSessionId.substring(0, 8)}…`;
     document.getElementById('lang-badge').textContent = selectedFramework;
 
-    // Transition: hide onboarding, show workspace
+    // Transition: hide onboarding, show workspace (with Create view)
     onboardingScreen.classList.add('hidden');
     setTimeout(() => {
         workspaceScreen.classList.add('active');
+        // Show Create view, hide chat
+        document.getElementById('create-view').style.display = 'flex';
+        document.getElementById('chat-view').style.display = 'none';
     }, 300);
 }
 
@@ -130,20 +133,21 @@ async function sendMessage() {
    ============================================ */
 
 async function callApi(payload, isDeploy, thinkingEl) {
-    try {
-        // 60-second timeout for slow API responses
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000);
+    console.log('🚀 [API START] Sending request:', payload);
+    const startTime = Date.now();
 
+    try {
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-            signal: controller.signal
+            body: JSON.stringify(payload)
         });
 
-        clearTimeout(timeoutId);
+        console.log(`📡 [API RESPONSE] Status: ${response.status}`, response);
         const resData = await response.json();
+        const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+        console.log(`⏱️ [API TIME] Request took ${duration}s`);
+        console.log('📦 [API DATA] Response body:', resData);
 
         // Remove thinking loader if present
         if (thinkingEl) thinkingEl.remove();
@@ -156,9 +160,11 @@ async function callApi(payload, isDeploy, thinkingEl) {
                 renderBotResponse(resData.data);
             }
         } else {
+            console.error('❌ [API ERROR] Application error:', resData.msg);
             handleError(resData.msg, isDeploy);
         }
     } catch (error) {
+        console.error('💥 [API EXCEPTION] Network/System error:', error);
         // Remove thinking loader if present
         if (thinkingEl) thinkingEl.remove();
         handleError(null, isDeploy);

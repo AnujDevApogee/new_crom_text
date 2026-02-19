@@ -580,6 +580,114 @@ body {
     background: var(--bg-primary);
 }
 
+/* Chat View (flex column to fill panel) */
+.chat-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* --- Create View --- */
+.create-view {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-primary);
+    animation: fadeIn 0.5s ease-out;
+}
+
+.create-content {
+    text-align: center;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.create-icon {
+    font-size: 3.5rem;
+    margin-bottom: 16px;
+    animation: neonPulse 3s ease-in-out infinite;
+}
+
+.create-heading {
+    font-family: var(--font-ui);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+.create-subtext {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+}
+
+.btn-create {
+    position: relative;
+    padding: 18px 56px;
+    font-family: var(--font-ui);
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--bg-primary);
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-lime));
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    animation: glowBreath 3s ease-in-out infinite;
+}
+
+.btn-create:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 0 35px rgba(0, 243, 255, 0.6), 0 0 70px rgba(57, 255, 20, 0.25);
+}
+
+.btn-create:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.btn-create:disabled {
+    opacity: 0.7;
+    cursor: wait;
+    animation: none;
+}
+
+.create-btn-glow {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2.5s infinite;
+}
+
+.create-btn-text {
+    position: relative;
+    z-index: 1;
+}
+
+.create-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(10, 10, 10, 0.3);
+    border-top-color: var(--bg-primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 /* Chat Messages Area */
 .chat-messages {
     flex: 1;

@@ -88,19 +88,19 @@
                     </div>
                 </div>
 
-                <!-- Chat Input -->
-                <div class="chat-input-area">
-                    <div class="chat-input-wrapper">
-                        <textarea id="chat-input" placeholder="Describe what you want to build..." rows="1"
-                            onkeydown="handleInputKeydown(event)"></textarea>
-                        <button class="btn-send" id="btn-send" onclick="sendMessage()" title="Send Message">
-                            ▶
-                        </button>
+                    <!-- Chat Input -->
+                    <div class="chat-input-area">
+                        <div class="chat-input-wrapper">
+                            <textarea id="chat-input" placeholder="Describe what you want to build..." rows="1"
+                                onkeydown="handleInputKeydown(event)"></textarea>
+                            <button class="btn-send" id="btn-send" onclick="sendMessage()" title="Send Message">
+                                ▶
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- ========================================
          DEPLOY MODAL
@@ -110,7 +110,7 @@
             <h2>🚀 Deploy Project</h2>
             <p class="modal-subtitle">Enter your custom domain to publish</p>
 
-            <input type="text" id="domain-input" placeholder="e.g. mywebsite.com"
+            <input type="text" id="domain-input" placeholder="e.g. mywebsite"
                 onkeydown="if(event.key==='Enter') publishDeploy()" oninput="clearDomainError()">
             <div class="domain-error" id="domain-error"></div>
 
