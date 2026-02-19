@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Simply Design — AI-powered chat-driven code generation interface with live preview and deployment.">
+    <title>Simply Design | AI Code Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+</head>
+
+<body>
+
+    <!-- ========================================
+         ONBOARDING SCREEN
+         ======================================== -->
+    <div id="onboarding-screen">
+        <!-- Animated Grid Background -->
+        <div class="grid-background">
+            <div class="neon-orb cyan"></div>
+            <div class="neon-orb pink"></div>
+            <div class="neon-orb lime"></div>
+        </div>
+
+        <!-- Center Card -->
+        <div class="onboarding-card">
+            <div class="logo-text">⚡ Simply Design</div>
+            <div class="logo-subtitle">AI-Powered Code Generation</div>
+
+            <label for="framework-select">Select your Framework</label>
+            <div class="select-wrapper">
+                <select id="framework-select">
+                    <option value="HTML/CSS">HTML / CSS</option>
+                    <option value="React">React</option>
+                    <option value="Vue.js">Vue.js</option>
+                    <option value="Next.js">Next.js</option>
+                </select>
+            </div>
+
+            <button class="btn-start" id="btn-start" onclick="handleStart()">
+                Start Coding
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================
+         WORKSPACE SCREEN
+         ======================================== -->
+    <div id="workspace-screen">
+        <!-- Header -->
+        <header class="workspace-header">
+            <div class="header-title">⚡ Simply Design</div>
+            <div class="header-meta">
+                <span class="lang-badge" id="lang-badge">HTML/CSS</span>
+                <span class="session-badge" id="session-badge"></span>
+                <button class="btn-deploy" id="btn-deploy" onclick="openDeployModal()">Deploy</button>
+            </div>
+        </header>
+
+        <!-- Split Pane -->
+        <div class="workspace-body">
+            <!-- Left: Live Preview -->
+            <div class="preview-panel">
+                <div class="panel-tab">
+                    <span class="dot"></span>
+                    <span>Live Preview</span>
+                </div>
+                <div class="preview-placeholder" id="preview-placeholder">
+                    <div class="placeholder-icon">🖥️</div>
+                    <p>Preview will appear here</p>
+                    <p style="font-size:0.72rem; opacity:0.5;">(HTML/CSS only)</p>
+                </div>
+                <iframe class="preview-frame" id="preview-frame" style="display:none;"
+                    sandbox="allow-scripts allow-same-origin" title="Live Preview"></iframe>
+            </div>
+
+            <!-- Right: Chat -->
+            <div class="chat-panel">
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Welcome Message -->
+                    <div class="welcome-message" id="welcome-msg">
+                        <div class="welcome-icon">🤖</div>
+                        <h3>Ready to Build</h3>
+                        <p>Describe what you want to create and I'll generate the code for you.</p>
+                    </div>
+                </div>
+
+                <!-- Chat Input -->
+                <div class="chat-input-area">
+                    <div class="chat-input-wrapper">
+                        <textarea id="chat-input" placeholder="Describe what you want to build..." rows="1"
+                            onkeydown="handleInputKeydown(event)"></textarea>
+                        <button class="btn-send" id="btn-send" onclick="sendMessage()" title="Send Message">
+                            ▶
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         DEPLOY MODAL
+         ======================================== -->
+    <div class="modal-overlay" id="deploy-modal">
+        <div class="deploy-modal">
+            <h2>🚀 Deploy Project</h2>
+            <p class="modal-subtitle">Enter your custom domain to publish</p>
+
+            <input type="text" id="domain-input" placeholder="e.g. mywebsite.com"
+                onkeydown="if(event.key==='Enter') publishDeploy()" oninput="clearDomainError()">
+            <div class="domain-error" id="domain-error"></div>
+
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeDeployModal()">Cancel</button>
+                <button class="btn-publish" id="btn-publish" onclick="publishDeploy()">Publish</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         SUCCESS / ERROR POPUP
+         ======================================== -->
+    <div class="popup-overlay" id="popup-overlay">
+        <div class="popup-box" id="popup-box">
+            <div class="popup-icon" id="popup-icon"></div>
+            <h3 id="popup-title"></h3>
+            <p id="popup-message"></p>
+            <a class="popup-link" id="popup-link" href="#" target="_blank" rel="noopener" style="display:none;"></a>
+            <br>
+            <button class="btn-close-popup" onclick="closePopup()">Close</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
