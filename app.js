@@ -4,6 +4,12 @@
 
 // --- Constants ---
 const API_URL = 'https://n8n.uptodd.co.in/webhook/update-react';
+const GET_DATA_URL = 'https://n8n.uptodd.co.in/webhook/Get-data';
+
+// --- Timing Constants ---
+const INITIAL_WAIT_MS = 2 * 60 * 1000; // 2 minutes
+const RETRY_WAIT_MS = 1 * 60 * 1000;   // 1 minute
+const MAX_RETRIES = 3;
 
 // --- State ---
 let currentSessionId = '';
@@ -158,7 +164,7 @@ async function callApi(payload, isDeploy, thinkingEl) {
         console.log('📦 [API DATA] Response body:', resData);
 
         // Remove thinking loader if present
-        if (thinkingEl) thinkingEl.remove();
+       // if (thinkingEl) thinkingEl.remove();
 
         if (resData.status === 'success') {
             if (isDeploy) {
@@ -167,6 +173,9 @@ async function callApi(payload, isDeploy, thinkingEl) {
             } else {
                 renderBotResponse(resData.data);
             }
+        } else if (resData.status === 'Processing') {
+            console.log('⏳ [API PROCESSING] Response is Processing. Starting delay and polling flow...');
+            await handleProcessingResponse(payload, thinkingEl);
         } else {
             console.error('❌ [API ERROR] Application error:', resData.msg);
             handleError(resData.msg, isDeploy);
@@ -206,6 +215,74 @@ function handleError(msg, isDeploy) {
         const finalMsg = msg || 'System Error: Unable to process request. Please try again.';
         appendErrorBubble(finalMsg);
     }
+}
+
+/**
+ * Handles the "Processing" state:
+ * 1. Waits for 2 minutes.
+ * 2. Polls GET API for up to 3 times with 1-minute delay.
+ */
+async function handleProcessingResponse(originalPayload, thinkingEl) {
+    const isDeploy = originalPayload.chat === 'DEPLOY';
+    const deployParam = isDeploy ? 'DEPLOY' : 'null';
+
+
+    // 1. Initial wait of 2 minutes
+    console.log(`⏲️ [WAIT] Initial wait for ${INITIAL_WAIT_MS / 1000}s...`);
+    await new Promise(resolve => setTimeout(resolve, isDeploy ? RETRY_WAIT_MS : INITIAL_WAIT_MS));
+
+
+    let retryCount = 0;
+    let success = false;
+
+    while (retryCount <= MAX_RETRIES && !success) {
+        if (retryCount > 0) {
+            if(!isDeploy){
+            console.log(`⏲️ [WAIT] Retry wait for ${RETRY_WAIT_MS / 1000}s... (Attempt ${retryCount})`);
+            await new Promise(resolve => setTimeout(resolve, RETRY_WAIT_MS));
+            }
+        }
+
+        try {
+            const getUrl = `${GET_DATA_URL}?sessionID=${currentSessionId}&deploy=${deployParam}`;
+            console.log(`📡 [GET API] Polling (Attempt ${retryCount + 1}): ${getUrl}`);
+
+            const response = await fetch(getUrl);
+            const resData = await response.json();
+            console.log('📦 [GET API DATA] Response:', resData);
+
+            if (resData.status === 'success') {
+                success = true;
+                if (thinkingEl) thinkingEl.remove();
+
+                if (isDeploy) {
+                    showSuccessPopup(resData.data.url);
+                } else {
+                    renderBotResponse(resData.data);
+                }
+                return; // Done
+            } else if (resData.status === 'Processing') {
+                console.log('⏳ [GET API] Still Processing...');
+                retryCount++;
+            } else if (resData.status === 'error' && isDeploy) {
+                // Deployment specific error
+                if (thinkingEl) thinkingEl.remove();
+                showErrorPopup(resData.msg || 'Deployment error occurred.');
+                return;
+            } else {
+                // Other error
+                console.error('❌ [GET API ERROR]', resData);
+                break;
+            }
+        } catch (error) {
+            console.error('💥 [GET API EXCEPTION]', error);
+            break;
+        }
+    }
+
+    // If we reach here, it failed or timed out
+    if (thinkingEl) thinkingEl.remove();
+    handleError('We are experiencing high demand. Please try again in a few moments.', isDeploy);
 }
 
 
